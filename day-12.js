@@ -860,97 +860,21 @@ console.log(AbsoluteNS + AbsoluteEW);
 
 // Figure out where the navigation instructions actually lead. What is the Manhattan distance between that location and the ship's starting position?
 
-const coordinates = {
-  N: 0,
-  E: 0,
-  W: 0,
-  S: 0
-};
+let x = 0, y = 0, xo = 10, yo = -1;
 
-const waypoint = {
-  E: 10,
-  N: 1
-};
-const compas = ['E', 'S', 'W', 'N'];
-
-let orientation = 'E';
-
-instructions.forEach(instruction => {
-  const direction = instruction[0];
-  const value = parseInt(instruction.substring(1));
-
-  if (direction === 'F') {
-    for (let key in waypoint) {
-      coordinates[key] = coordinates[key] + value * waypoint[key];
+instructions.forEach(line => {
+    const action = line[0], value = +line.substr(1);
+    let angle = value / 90;
+    switch (action) {
+        case 'N': yo -= value; break;
+        case 'S': yo += value; break;
+        case 'W': xo -= value; break;
+        case 'E': xo += value; break;
+        case 'L': while (angle--) [xo, yo] = [yo, -xo]; break;
+        case 'R': while (angle--) [xo, yo] = [-yo, xo]; break;
+        case 'F': [x, y] = [x + xo * value, y + yo * value]; break;
     }
-  } else if (direction === 'R') {
-    const change = value / 90;
-    let originalWayPoint = {};
-    for (let key in waypoint) {
-      if (waypoint.hasOwnProperty(key)) {
-        originalWayPoint[key] = waypoint[key];
-      }
-    }
-    for (let key in waypoint) {
-      if (waypoint.hasOwnProperty(key)) {
-        let index = compas.indexOf(key) + change;
-        if (index > 3) {
-          index = index - 4;
-        }
-        const newKey = compas[index];
-        waypoint[newKey] = originalWayPoint[key];
-        delete waypoint[key];
-      }
-    }
-  } else if (direction === 'L') {
-    const change = value / 90;
-    let originalWayPoint = {};
-    for (let key in waypoint) {
-      if (waypoint.hasOwnProperty(key)) {
-        originalWayPoint[key] = waypoint[key];
-      }
-    }
-
-    for (let key in originalWayPoint) {
-      if (waypoint.hasOwnProperty(key)) {
-        let index = compas.indexOf(key) - change;
-        if (index < 0) {
-          index = 4 + index;
-        }
-        const newKey = compas[index];
-        waypoint[newKey] = originalWayPoint[key];
-        delete waypoint[key];
-      }
-    }
-  } else {
-    if (waypoint.hasOwnProperty(direction)) {
-      waypoint[direction] = waypoint[direction] + value;
-    } else {
-      if (direction === 'W') {
-        waypoint.E = waypoint.E - value;
-      }
-      if (direction === 'E') {
-        waypoint.W = waypoint.W - value;
-      }
-      if (direction === 'S') {
-        waypoint.N = waypoint.N - value;
-      }
-      if (direction === 'N') {
-        waypoint.S = waypoint.S - value;
-      }
-    }
-  }
 });
 
-const AbsoluteNS =
-  coordinates['N'] > coordinates['S']
-    ? coordinates['N'] - coordinates['S']
-    : coordinates['S'] - coordinates['N'];
-const AbsoluteEW =
-  coordinates['E'] > coordinates['W']
-    ? coordinates['E'] - coordinates['W']
-    : coordinates['W'] - coordinates['E'];
-
-console.log(AbsoluteNS + AbsoluteEW);
-
-// Not working
+const answer = Math.abs(x) + Math.abs(y);
+console.log(answer);
